@@ -1,14 +1,13 @@
 use std::io;
 use std::io::prelude::*;
-use std::fs::File;
 
 #[derive(Debug, PartialEq)]
-struct LineWithOutNumber<'a> (&'a str);
+struct LineWithOutNumber<'a>(&'a str);
 
 fn find_calibration_values(text: &str) -> impl Iterator<Item = Result<u32, LineWithOutNumber>> {
     text.lines().map(|line| {
         let first = line.chars().find_map(|c| c.to_digit(10));
-        let last  = line.chars().rev().find_map(|c| c.to_digit(10));
+        let last = line.chars().rev().find_map(|c| c.to_digit(10));
 
         if let (Some(first), Some(last)) = (first, last) {
             Ok(first * 10 + last)
