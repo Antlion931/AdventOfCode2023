@@ -51,6 +51,10 @@ impl PatternMatcher {
             pi: self.pi.iter().rev().cloned().collect(),
         }
     }
+
+    pub fn reset(&mut self) {
+        self.current_matched_chars = 0;
+    }
 }
 
 // Calculate the prefix function of a pattern, used in KMP algorithm

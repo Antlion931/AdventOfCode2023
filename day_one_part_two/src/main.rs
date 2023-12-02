@@ -6,7 +6,7 @@ mod pattern_matcher;
 use pattern_matcher::PatternMatcher;
 
 fn find_calibration_values(text: &str) -> impl Iterator<Item = Result<u32, LineWithOutNumber>> {
-    let matchers = vec![
+    let mut matchers = vec![
         PatternMatcher::new("one", 1),
         PatternMatcher::new("two", 2),
         PatternMatcher::new("three", 3),
@@ -28,14 +28,22 @@ fn find_calibration_values(text: &str) -> impl Iterator<Item = Result<u32, LineW
         PatternMatcher::new("9", 9),
     ];
 
-    let matchers_rev = matchers
+    let mut matchers_rev = matchers
         .iter()
         .map(|matcher| matcher.reverse())
         .collect::<Vec<_>>();
 
     text.lines().map(move |line| {
-        let first = read_string_unitl_pattern_matched(line.chars(), matchers.clone());
-        let last = read_string_unitl_pattern_matched(line.chars().rev(), matchers_rev.clone());
+        let first = read_string_unitl_pattern_matched(line.chars(), &mut matchers);
+        let last = read_string_unitl_pattern_matched(line.chars().rev(), &mut matchers_rev);
+
+        for m in matchers.iter_mut() {
+            m.reset();
+        }
+
+        for m in matchers_rev.iter_mut() {
+            m.reset();
+        }
 
         if let (Some(first), Some(last)) = (first, last) {
             Ok(first * 10 + last)
@@ -51,7 +59,7 @@ struct LineWithOutNumber<'a>(&'a str);
 // Uses Iterator to avoid allocating a new string
 fn read_string_unitl_pattern_matched(
     chars: impl Iterator<Item = char>,
-    mut matchers: Vec<PatternMatcher>,
+    matchers: &mut [PatternMatcher],
 ) -> Option<u32> {
     for c in chars {
         for matcher in matchers.iter_mut() {
